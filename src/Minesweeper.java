@@ -9,6 +9,7 @@ public class Minesweeper {
     static boolean[][] mines;               // mines array
     static boolean[][] touched;             // touches made array
     static boolean lose;                    // means that you're lose.
+    static boolean fieldCreated;            // shows if field was created
     static String[][] resultMap;            // result map array
     static int touches = 0;                 // available touches
     static int flags = 0;                   // used flags
@@ -27,6 +28,7 @@ public class Minesweeper {
         @Override
         public void run() {
             System.out.println(Messages.NEW);
+            fieldCreated = false;
             createField();
             drawResultMap();
             new CellTouchingThread().start();
@@ -106,6 +108,11 @@ public class Minesweeper {
             }
 
             if (!flag) {
+                if (!fieldCreated) {
+                    generateMines(x, y);
+                    fieldCreated = true;
+                }
+
                 // touch logic
                 if (touched[y][x]) {
                     System.out.println(Messages.TOUCHED);
@@ -227,8 +234,13 @@ public class Minesweeper {
                 }
             }
 
-            // flag placement logic
             if (flag) {
+                if (!fieldCreated) {
+                    generateMines();
+                    fieldCreated = true;
+                }
+
+                // flag placement logic
                 if (touched[y][x]) {
                     System.out.println(Messages.TOUCHED);
                     new FlagThread().start();
@@ -259,8 +271,11 @@ public class Minesweeper {
             System.out.println(Messages.DOUBLE_LINE);
             drawResultMap();
 
-            if (lose) { System.out.println(Messages.LOSE); }
-            else      { System.out.println(Messages.WON); }
+            if (lose) {
+                System.out.println(Messages.LOSE);
+            } else {
+                System.out.println(Messages.WON);
+            }
 
             System.out.println( Messages.LINE + "\n" +
                     NUM + Messages.NUM_IS +
@@ -418,6 +433,40 @@ public class Minesweeper {
         xEmptyCell = new ArrayList<>();
         yEmptyCell = new ArrayList<>();
 
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                resultMap[h][w] = UNTOUCHED;
+            }
+        }
+    }
+
+        // excludes touched cell from available for generating
+    static void generateMines(int x, int y) {
+        boolean full = false;
+        if (minesCount == width * height) {
+            full = true;
+        } else {
+            for (int i = 0; i < minesCount; i++) {
+                int index = random(width * height - 1);
+
+                while (minesList.contains(index) || index == getCellIndex(x, y, width)) {
+                    index = random(width * height - 1);
+                }
+
+                minesList.add(index);
+            }
+        }
+
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                if (full || minesList.contains(getCellIndex(w, h, width))) {
+                    mines[h][w] = true;
+                }
+            }
+        }
+    }
+
+    static void generateMines() {
         for (int i = 0; i < minesCount; i++) {
             int index = random(width * height - 1);
 
@@ -433,12 +482,6 @@ public class Minesweeper {
                 if (minesList.contains(w + h * width)) {
                     mines[h][w] = true;
                 }
-            }
-        }
-
-        for (int h = 0; h < height; h++) {
-            for (int w = 0; w < width; w++) {
-                resultMap[h][w] = UNTOUCHED;
             }
         }
     }
@@ -518,20 +561,6 @@ public class Minesweeper {
         }
     }
 
-    static int getCountAround(int x, int y) {
-        int count = 0;
-
-        for (int h = 0; h < height; h++) {
-            for (int w = 0; w < width; w++) {
-                if (mines[h][w] && isNear(y, x, h, w)) {
-                    count++;
-                }
-            }
-        }
-
-        return count;
-    }
-
     static void openEmpty(int x, int y) {
         if ( ! xEmptyCell.isEmpty()) {
             xEmptyCell.remove(0);
@@ -568,8 +597,26 @@ public class Minesweeper {
         }
     }
 
+    static int getCountAround(int x, int y) {
+        int count = 0;
+
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                if (mines[h][w] && isNear(y, x, h, w)) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     static boolean isNear(int x1, int y1, int x2, int y2) {
         return (Math.abs(x2 - x1) <= 1) && (Math.abs(y2 - y1) <= 1);
+    }
+
+    static int getCellIndex(int x, int y, int width) {
+        return (width * y + x);
     }
 
     static int random(int max) {
@@ -584,12 +631,12 @@ public class Minesweeper {
     }
     */
 
-    /**
-     * Draws mines position on the map.
-     *
-     * Use this method for testing to see all mines without taking
-     * any effect on gameplay
-     */
+    /*
+      Draws mines position on the map.
+
+      Use this method for testing to see all mines without taking
+      any effect on gameplay
+    */
 
     /*
     static void drawFieldMines() {
@@ -609,3 +656,4 @@ public class Minesweeper {
     }
     */
 }
+
