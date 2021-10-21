@@ -100,8 +100,9 @@ class TouchingThread extends Thread{
                     new GameOverThread().start();
                 } else {
                     Main.touched[y][x] = true;
+                    int around = Main.getCountAround(x, y);
 
-                    if (Main.getCountAround(x, y) == 0) {
+                    if (around == 0) {
                         Main.resultMap[y][x] = Main.EMPTY;
                         Main.xEmptyCell.add(x);
                         Main.yEmptyCell.add(y);
@@ -110,7 +111,17 @@ class TouchingThread extends Thread{
                             Main.openEmpty(Main.xEmptyCell.get(0), Main.yEmptyCell.get(0));
                         }
                     } else {
-                        Main.resultMap[y][x] = ' ' + valueOf(Main.getCountAround(x, y)) + ' ';
+                        String color = switch (around) {
+                            case 1 -> Main.C1;
+                            case 2 -> Main.C2;
+                            case 3 -> Main.C3;
+                            case 4 -> Main.C4;
+                            case 5 -> Main.C5;
+                            case 6 -> Main.C6;
+                            case 7 -> Main.C7;
+                            default -> Main.C8;
+                        };
+                        Main.resultMap[y][x] = ' ' + color + around + Main.RESET + ' ';
                     }
 
                     if (--Main.touches == 0) {

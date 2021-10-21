@@ -30,7 +30,6 @@ public enum Messages {
     NEW(LINE + "\nGame started\n"),
     THANKS("\nThanks for playing!"),
     RESULT("\nResult map"),
-    MINES("\nMines map"),
     GREETINGS(  "MINESWEEPER v1.0\n" +
                 "w.shuminski\n\n" +
                 "Type dimensions of the new field and mines quantity.\n" +
@@ -40,7 +39,7 @@ public enum Messages {
                 "In this case you'll go to the flag mode. To return to the discovery mode just press Enter."),
     ERROR("Something went wrong. Try again.\n");
 
-    private String message;
+    private final String message;
 
     Messages(String message){
         this.message = message;

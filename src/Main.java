@@ -7,6 +7,16 @@ import java.util.ArrayList;
 import static java.lang.System.out;
 
 public class Main {
+    static final String RESET = "\u001B[0m";
+    static final String C1 = "\u001B[38;2;50;165;255m";
+    static final String C2 = "\u001B[38;2;100;200;80m";
+    static final String C3 = "\u001B[38;2;255;100;100m";
+    static final String C4 = "\u001B[38;2;135;80;245m";
+    static final String C5 = "\u001B[38;2;90;15;15m";
+    static final String C6 = "\u001B[38;2;200;200;200m";
+    static final String C7 = "\u001B[38;2;150;150;150m";
+    static final String C8 = "\u001B[38;2;100;100;100m";
+
     static volatile boolean flag;           // determines which of touch or flag threads are allowed
     static boolean[][] mines;               // mines array
     static boolean[][] touched;             // touches made array
@@ -20,11 +30,11 @@ public class Main {
     static ArrayList<Integer> yEmptyCell;   // list of y-coordinates of empty cells
     static ArrayList<Integer> minesList;    // generated indexes of mines
     static String UNTOUCHED = "[░]";
-    static String EMPTY = "   ";
-    static String NUM = " 1 ";
-    static String FLAG = " · ";
-    static String MINE = " ֍ ";
-    static String LAST = " x ";
+    static String EMPTY = "\u001B[38;2;85;85;85m · " + RESET;
+    static String NUM = C1 + " 1 " + RESET;
+    static String FLAG = "\u001B[38;2;255;255;0m ⚠ " + RESET;
+    static String MINE = "\u001B[38;2;100;80;80m ֍ " + RESET;
+    static String LAST = "\u001B[38;2;255;70;70m ֍ " + RESET;
 
     public static void main(String[] args) {
         out.println(Messages.GREETINGS);
@@ -264,13 +274,25 @@ public class Main {
 
         for (int h = yStart; h <= yEnd; h++) {
             for (int w = xStart; w <= xEnd; w++) {
-                if ( !(h == y && w == x) && !touched[h][w] ) {
-                    if ( resultMap[h][w].equals(FLAG) ) {
+                if (!(h == y && w == x) && !touched[h][w]) {
+                    if (resultMap[h][w].equals(FLAG)) {
                         flags--;
                     }
+                    int around = getCountAround(w, h);
 
-                    if (getCountAround(w, h) > 0) {
-                        resultMap[h][w] = ' ' + String.valueOf(getCountAround(w, h)) + ' ';
+                    if (around > 0) {
+                        String color = switch (around) {
+                            case 1 -> C1;
+                            case 2 -> C2;
+                            case 3 -> C3;
+                            case 4 -> C4;
+                            case 5 -> C5;
+                            case 6 -> C6;
+                            case 7 -> C7;
+                            default -> C8;
+                        };
+
+                        resultMap[h][w] = ' ' + color + around + RESET + ' ';
                         touched[h][w] = true;
                         touches--;
                     } else if (Math.abs(x - w) != Math.abs(y - h)) {
@@ -309,32 +331,4 @@ public class Main {
     static int random(int max) {
         return (int) (Math.random() * (max + 1));
     }
-
-    /*
-    static int random() {
-        //static int random(int min, int max) {
-        //return (int) (Math.random() * (max - min + 1) + min);
-        return (int) (Math.random() * 100 + 1);
-    }
-    */
-
-    /*
-      Draws mines position on the map.
-      Use this method for testing to see all mines without taking
-      any effect on gameplay
-    */
-    /*
-    static void drawFieldMines() {
-        System.out.println(Messages.MINES);
-        StringBuilder rowSb;
-        for (boolean[] mine : mines) {
-            rowSb = new StringBuilder();
-            for (boolean isMine : mine) {
-                if (isMine) {rowSb.append("[֍]"); }
-                else        {rowSb.append("[ ]"); }
-            }
-            System.out.println(rowSb);
-        }
-    }
-    */
 }
