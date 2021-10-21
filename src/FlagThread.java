@@ -7,40 +7,43 @@ import static java.lang.System.out;
 
 class FlagThread extends Thread {
     private static int x, y;
+    static final Termicol flag = new Termicol()
+            .setFG(225, 225, 100).setEffect(Effect.FAINT);
 
     @Override
     public void run() {
         boolean valueAccepted = false;
         String line;
         BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-        out.println(Messages.FLAG);
+        flag.setText(Messages.FLAG).printlnAndReset();
 
         // x-coordinate of flag
         while (!valueAccepted) {
-            out.print("x: ");
+            flag.setText("x: ").printAndReset();
 
             try {
                 line = r.readLine();
 
-                if (line == null || line.length() == 0) {
-                    out.println();
+                if (line == null || line.isEmpty()) {
                     valueAccepted = true;
                     Main.flag = false;
+                } else if (Main.EXIT.contains(line.toLowerCase())) {
+                    Main.exit();
                 } else {
                     try {
                         x = parseInt(line) - 1;
 
                         if (x < 0 || x >= Main.width) {
-                            out.println(Messages.GOT_OUT_OF_WIDTH);
+                            Main.error.setText(Messages.GOT_OUT_OF_WIDTH).printlnAndReset();
                         } else {
                             valueAccepted = true;
                         }
                     } catch (NumberFormatException e) {
-                        out.println(Messages.ERROR);
+                        Main.error.setText(Messages.ERROR).printlnAndReset();
                     }
                 }
             } catch (IOException e) {
-                out.println(Messages.ERROR);
+                Main.error.setText(Messages.ERROR).printlnAndReset();
             }
         }
 
@@ -49,31 +52,31 @@ class FlagThread extends Thread {
             valueAccepted = false;
 
             while (!valueAccepted) {
-                out.print("y: ");
+                flag.setText("y: ").printAndReset();
 
                 try {
                     line = r.readLine();
 
-                    if (line == null || line.length() == 0) {
-                        out.println();
-                        new TouchingThread().start();
-                        out.println("flag thread interrupt");
-                        currentThread().interrupt();
+                    if (line == null || line.isEmpty()) {
+                        valueAccepted = true;
+                        Main.flag = false;
+                    } else if (Main.EXIT.contains(line.toLowerCase())) {
+                        Main.exit();
                     } else {
                         try {
                             y = parseInt(line) - 1;
 
                             if (y < 0 || y >= Main.height) {
-                                out.println(Messages.GOT_OUT_OF_HEIGHT);
+                                Main.error.setText(Messages.GOT_OUT_OF_HEIGHT).printlnAndReset();
                             } else {
                                 valueAccepted = true;
                             }
                         } catch (NumberFormatException e) {
-                            out.println(Messages.ERROR);
+                            Main.error.setText(Messages.ERROR).printlnAndReset();
                         }
                     }
                 } catch (IOException e) {
-                    out.println(Messages.ERROR);
+                    Main.error.setText(Messages.ERROR).printlnAndReset();
                 }
             }
         }
@@ -86,7 +89,7 @@ class FlagThread extends Thread {
 
             // flag placement logic
             if (Main.touched[y][x]) {
-                out.println(Messages.TOUCHED);
+                Main.notify.setText(Messages.TOUCHED).printlnAndReset();
             } else {
                 if (Main.resultMap[y][x].equals(Main.FLAG)) {
                     Main.resultMap[y][x] = Main.UNTOUCHED;
@@ -101,7 +104,7 @@ class FlagThread extends Thread {
         }
 
         if (!Main.flag) {
-            out.println("Switched to Touch mode.\n");
+            out.println("\nSwitched to Touch mode.\n");
             new TouchingThread().start();
         }
     }

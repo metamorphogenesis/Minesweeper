@@ -4,18 +4,40 @@ import java.io.InputStreamReader;
 import java.lang.Math;
 import java.util.ArrayList;
 
+import static java.lang.Math.*;
 import static java.lang.System.out;
+import static java.util.Arrays.asList;
 
 public class Main {
+    private static final Termicol tc = new Termicol();
+    static final Termicol error = new Termicol().setFG(225, 100, 100)
+            .setEffect(Effect.FAINT).setEffect(Effect.ITALIC);
+    static final Termicol notify = new Termicol().setFG(225, 175, 100)
+            .setEffect(Effect.FAINT).setEffect(Effect.ITALIC);
+
     static final String RESET = "\u001B[0m";
     static final String C1 = "\u001B[38;2;50;165;255m";
     static final String C2 = "\u001B[38;2;100;200;80m";
     static final String C3 = "\u001B[38;2;255;100;100m";
     static final String C4 = "\u001B[38;2;135;80;245m";
-    static final String C5 = "\u001B[38;2;90;15;15m";
+    static final String C5 = "\u001B[38;2;120;60;60m";
     static final String C6 = "\u001B[38;2;200;200;200m";
     static final String C7 = "\u001B[38;2;150;150;150m";
     static final String C8 = "\u001B[38;2;100;100;100m";
+    static final String UNTOUCHED = "\u001B[38;2;125;125;125m[░]" + RESET;
+    static final String EMPTY = "\u001B[38;2;85;85;85m · " + RESET;
+    static final String NUM = C1 + " 1 " + RESET;
+    static final String FLAG = '[' + "\u001B[38;2;255;255;0m⚠" + RESET + ']';
+    static final String MINE = "\u001B[38;2;200;170;80m ֍ " + RESET;
+    static final String LAST = "\u001B[38;2;255;40;40m ֍ " + RESET;
+    static final ArrayList<String> EXIT = new ArrayList<>(asList("exit", "quit", "end"));
+
+    static final int minWidth = 1;
+    static final int maxWidth = 30;
+    static final int minHeight = 1;
+    static final int maxHeight = 30;
+    static final int minMineCoverage = 5;
+    static final int maxMineCoverage = 60;
 
     static volatile boolean flag;           // determines which of touch or flag threads are allowed
     static boolean[][] mines;               // mines array
@@ -29,15 +51,11 @@ public class Main {
     static ArrayList<Integer> xEmptyCell;   // list of x-coordinates of empty cells
     static ArrayList<Integer> yEmptyCell;   // list of y-coordinates of empty cells
     static ArrayList<Integer> minesList;    // generated indexes of mines
-    static String UNTOUCHED = "[░]";
-    static String EMPTY = "\u001B[38;2;85;85;85m · " + RESET;
-    static String NUM = C1 + " 1 " + RESET;
-    static String FLAG = "\u001B[38;2;255;255;0m ⚠ " + RESET;
-    static String MINE = "\u001B[38;2;100;80;80m ֍ " + RESET;
-    static String LAST = "\u001B[38;2;255;70;70m ֍ " + RESET;
 
     public static void main(String[] args) {
-        out.println(Messages.GREETINGS);
+        tc.setText(Messages.TITLE).setFG(255, 200, 0).setEffect(Effect.BOLD).println();
+        tc.setText(Messages.AUTHOR + "\n").setEffect(Effect.FAINT).setEffect(Effect.ITALIC).println();
+        tc.setText(Messages.GREETINGS + "\n").setFG(50, 175, 225).printAndReset();
         new NewGameThread().start();
     }
 
@@ -54,24 +72,26 @@ public class Main {
                 line = r.readLine();
 
                 if (line == null || line.isEmpty()) {
-                    width = random(100);
-                    out.println(Messages.RANDOM_WIDTH);
+                    width = random(minWidth, maxWidth);
+                    notify.setText(Messages.RANDOM_WIDTH).printlnAndReset();
                     valueAccepted = true;
+                } else if (EXIT.contains(line.toLowerCase())) {
+                    exit();
                 } else {
                     try {
                         width = Integer.parseInt(line);
 
-                        if (width <= 0 || width > 100) {
-                            out.println(Messages.WIDTH_OUT_OF_RANGE);
+                        if (width < minWidth || width > maxWidth) {
+                            error.setText(Messages.WIDTH_OUT_OF_RANGE).printlnAndReset();
                         } else {
                             valueAccepted = true;
                         }
                     } catch (NumberFormatException e) {
-                        out.println(Messages.ERROR);
+                        error.setText(Messages.ERROR).printlnAndReset();
                     }
                 }
             } catch (IOException e) {
-                out.println(Messages.ERROR);
+                error.setText(Messages.ERROR).printlnAndReset();
             }
         }
         valueAccepted = false;
@@ -84,27 +104,28 @@ public class Main {
                 line = r.readLine();
 
                 if (line == null || line.isEmpty()) {
-                    height = random(100);
-                    out.println(Messages.RANDOM_HEIGHT);
+                    height = random(minHeight, maxHeight);
+                    notify.setText(Messages.RANDOM_HEIGHT).printlnAndReset();
                     valueAccepted = true;
+                } else if (EXIT.contains(line.toLowerCase())) {
+                    exit();
                 } else {
                     try {
                         height = Integer.parseInt(line);
 
-                        if (height <= 0 || height > 100) {
-                            out.println(Messages.HEIGHT_OUT_OF_RANGE);
+                        if (height < minHeight || height > maxHeight) {
+                            error.setText(Messages.HEIGHT_OUT_OF_RANGE).printlnAndReset();
                         } else {
                             valueAccepted = true;
                         }
                     } catch (NumberFormatException e) {
-                        out.println(Messages.ERROR);
+                        error.setText(Messages.ERROR).printlnAndReset();
                     }
                 }
             } catch (IOException e) {
-                out.println(Messages.ERROR);
+                error.setText(Messages.ERROR).printlnAndReset();
             }
         }
-
         valueAccepted = false;
 
         // mines generation
@@ -115,24 +136,26 @@ public class Main {
                 line = r.readLine();
 
                 if ( line == null || line.isEmpty() ) {
-                    minesCount = random(width * height);
-                    out.println(Messages.RANDOM_MINES);
+                    minesCount = random(width * height * minMineCoverage / 100, width * height * maxMineCoverage / 100);
+                    notify.setText(Messages.RANDOM_MINES).printlnAndReset();
                     valueAccepted = true;
+                } else if (EXIT.contains(line.toLowerCase())) {
+                    exit();
                 } else {
                     try {
                         minesCount = Integer.parseInt(line);
 
                         if (minesCount <= 0 || minesCount > width * height) {
-                            out.println(Messages.MINES_OUT_OF_RANGE);
+                            error.setText(Messages.MINES_OUT_OF_RANGE).printlnAndReset();
                         } else {
                             valueAccepted = true;
                         }
                     } catch (NumberFormatException e) {
-                        out.println(Messages.ERROR);
+                        error.setText(Messages.ERROR).printlnAndReset();
                     }
                 }
             } catch (IOException e) {
-                out.println(Messages.ERROR);
+                error.setText(Messages.ERROR).printlnAndReset();
             }
         }
 
@@ -281,21 +304,38 @@ public class Main {
                     int around = getCountAround(w, h);
 
                     if (around > 0) {
-                        String color = switch (around) {
-                            case 1 -> C1;
-                            case 2 -> C2;
-                            case 3 -> C3;
-                            case 4 -> C4;
-                            case 5 -> C5;
-                            case 6 -> C6;
-                            case 7 -> C7;
-                            default -> C8;
-                        };
+                        String color;
+                        switch (around) {
+                            case 1:
+                                color = C1;
+                                break;
+                            case 2:
+                                color = C2;
+                                break;
+                            case 3:
+                                color = C3;
+                                break;
+                            case 4:
+                                color = C4;
+                                break;
+                            case 5:
+                                color = C5;
+                                break;
+                            case 6:
+                                color = C6;
+                                break;
+                            case 7:
+                                color = C7;
+                                break;
+                            default:
+                                color = C8;
+                                break;
+                        }
 
                         resultMap[h][w] = ' ' + color + around + RESET + ' ';
                         touched[h][w] = true;
                         touches--;
-                    } else if (Math.abs(x - w) != Math.abs(y - h)) {
+                    } else if (abs(x - w) != abs(y - h)) {
                         resultMap[h][w] = EMPTY;
                         xEmptyCell.add(w);
                         yEmptyCell.add(h);
@@ -321,7 +361,7 @@ public class Main {
     }
 
     static boolean isNear(int x1, int y1, int x2, int y2) {
-        return (Math.abs(x2 - x1) <= 1) && (Math.abs(y2 - y1) <= 1);
+        return abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1;
     }
 
     static int getCellIndex(int x, int y, int width) {
@@ -330,5 +370,14 @@ public class Main {
 
     static int random(int max) {
         return (int) (Math.random() * (max + 1));
+    }
+
+    static int random(int min, int max) {
+        return (int) (Math.random() * (max + 1 - min) + min);
+    }
+
+    static void exit() {
+        new Termicol(Messages.THANKS).setFG(255, 200, 0).setEffect(Effect.BOLD).println();
+        System.exit(0);
     }
 }

@@ -1,8 +1,8 @@
 public enum Messages {
-    TYPE_WIDTH("Type field width (1-100): "),
-    TYPE_HEIGHT("Type field height (1-100): "),
-    WIDTH_OUT_OF_RANGE("The width must be between 1-100. Set another width.\n"),
-    HEIGHT_OUT_OF_RANGE("The height must be between 1-100. Set another height.\n"),
+    TYPE_WIDTH("Type field width (" + Main.minWidth + "-" + Main.maxWidth + "): "),
+    TYPE_HEIGHT("Type field height (" + Main.minHeight + "-" + Main.maxHeight + "): "),
+    WIDTH_OUT_OF_RANGE("The width must be between " + Main.minWidth + "-" + Main.maxWidth + ". Set another width.\n"),
+    HEIGHT_OUT_OF_RANGE("The height must be between " + Main.minHeight + "-" + Main.maxHeight + ". Set another height.\n"),
     RANDOM_WIDTH("The width generated randomly.\n"),
     RANDOM_HEIGHT("The height generated randomly.\n"),
     TYPE_MINES("Type mines quantity: "),
@@ -10,13 +10,12 @@ public enum Messages {
     RANDOM_MINES("The mines quantity generated randomly.\n"),
     FLAG("Flag"),
     TOUCH("Touch"),
-    GOT_OUT_OF_WIDTH("You got out of the width. Type another x-coordinate.\n"),
-    GOT_OUT_OF_HEIGHT("You got out of the height. Type another y-coordinate.\n"),
+    GOT_OUT_OF_WIDTH("You got out of width. Type another x-coordinate.\n"),
+    GOT_OUT_OF_HEIGHT("You got out of height. Type another y-coordinate.\n"),
     TOUCHED("You've touched this cell. Try another one.\n"),
-    WON("\nYOU WON."),
-    LOSE("\nYOU LOSE."),
+    WON("YOU WON."),
+    LOSE("YOU LOSE."),
     LINE("----------------------------"),
-    DOUBLE_LINE("\n============================"),
     NUM_IS(" - cell near the mine\n"),
     EMPTY_IS(" - empty cell"),
     FLAG_IS(" - flag"),
@@ -25,18 +24,23 @@ public enum Messages {
     LAST_IS(" - your last touch"),
     QUESTION("\nWould you like to play again?\n\n"),
     YES("Yes"),
-    ANSWERS("[ " + YES + "] - new game\n[ Anything else ] - exit\n"),
+    ANSWERS("[ " + YES + " ] - new game\n[ Anything else ] - exit\n"),
     SO("So? : "),
-    NEW(LINE + "\nGame started\n"),
+    NEW("\n" + LINE + "\nGame started\n"),
     THANKS("\nThanks for playing!"),
     RESULT("\nResult map"),
-    GREETINGS(  "MINESWEEPER v1.0\n" +
-                "w.shuminski\n\n" +
-                "Type dimensions of the new field and mines quantity.\n" +
-                "Negative value means that the value will be generated randomly.\n" +
-                "Type coordinates of the cell to discover it.\n" +
-                "If you'd like to flag the cell type \"" + FLAG.toString().toLowerCase() + "\" instead of any coordinate.\n" +
-                "In this case you'll go to the flag mode. To return to the discovery mode just press Enter."),
+    TITLE("MINESWEEPER v2.2"),
+    AUTHOR("w.shuminski"),
+    GREETINGS("\tBefore you start:\n"
+            + "• Type dimensions of the new field and mines quantity.\n"
+            + "• Empty value means that it will be generated randomly.\n\n"
+            + "\tAfter you start:\n"
+            + "• Type coordinates of the cell to discover it.\n"
+            + "• If you'd like to flag the cell just press Enter instead of any coordinate.\n"
+            + "  In this case you'll go to the flag mode.\n"
+            + "• To return to the touch mode press Enter again.\n\n"
+            + "\tAt any time:\n"
+            + "• Type any of Exit, Quit or End instead of any value to stop game."),
     ERROR("Something went wrong. Try again.\n");
 
     private final String message;

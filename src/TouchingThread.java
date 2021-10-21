@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static java.lang.Integer.parseInt;
-import static java.lang.String.valueOf;
 import static java.lang.System.out;
 
 class TouchingThread extends Thread{
@@ -23,25 +22,26 @@ class TouchingThread extends Thread{
             try {
                 line = r.readLine();
 
-                if (line == null || line.length() == 0) {
-                    out.println();
+                if (line == null || line.isEmpty()) {
                     valueAccepted = true;
                     Main.flag = true;
+                } else if (Main.EXIT.contains(line.toLowerCase())) {
+                    Main.exit();
                 } else {
                     try {
                         x = parseInt(line) - 1;
 
                         if (x < 0 || x >= Main.width) {
-                            out.println(Messages.GOT_OUT_OF_WIDTH);
+                            Main.error.setText(Messages.GOT_OUT_OF_WIDTH).printlnAndReset();
                         } else {
                             valueAccepted = true;
                         }
                     } catch (NumberFormatException e) {
-                        out.println(Messages.ERROR);
+                        Main.error.setText(Messages.ERROR).printlnAndReset();
                     }
                 }
             } catch (IOException e) {
-                out.println(Messages.ERROR);
+                Main.error.setText(Messages.ERROR).printlnAndReset();
             }
         }
 
@@ -55,25 +55,26 @@ class TouchingThread extends Thread{
                 try {
                     line = r.readLine();
 
-                    if (line == null || line.length() == 0) {
-                        out.println();
+                    if (line == null || line.isEmpty()) {
                         valueAccepted = true;
                         Main.flag = true;
+                    } else if (Main.EXIT.contains(line.toLowerCase())) {
+                        Main.exit();
                     } else {
                         try {
                             y = parseInt(line) - 1;
 
                             if (y < 0 || y >= Main.height) {
-                                out.println(Messages.GOT_OUT_OF_HEIGHT);
+                                Main.error.setText(Messages.GOT_OUT_OF_HEIGHT).printlnAndReset();
                             } else {
                                 valueAccepted = true;
                             }
                         } catch (NumberFormatException e) {
-                            out.println(Messages.ERROR);
+                            Main.error.setText(Messages.ERROR).printlnAndReset();
                         }
                     }
                 } catch (IOException e) {
-                    out.println(Messages.ERROR);
+                    Main.error.setText(Messages.ERROR).printlnAndReset();
                 }
             }
         }
@@ -86,7 +87,7 @@ class TouchingThread extends Thread{
 
             // touch logic
             if (Main.touched[y][x]) {
-                out.println(Messages.TOUCHED);
+                Main.notify.setText(Messages.TOUCHED).printlnAndReset();
                 new TouchingThread().start();
             } else {
                 if (Main.resultMap[y][x].equals(Main.FLAG)) {
@@ -111,16 +112,33 @@ class TouchingThread extends Thread{
                             Main.openEmpty(Main.xEmptyCell.get(0), Main.yEmptyCell.get(0));
                         }
                     } else {
-                        String color = switch (around) {
-                            case 1 -> Main.C1;
-                            case 2 -> Main.C2;
-                            case 3 -> Main.C3;
-                            case 4 -> Main.C4;
-                            case 5 -> Main.C5;
-                            case 6 -> Main.C6;
-                            case 7 -> Main.C7;
-                            default -> Main.C8;
-                        };
+                        String color;
+                        switch (around) {
+                            case 1:
+                                color = Main.C1;
+                                break;
+                            case 2:
+                                color = Main.C2;
+                                break;
+                            case 3:
+                                color = Main.C3;
+                                break;
+                            case 4:
+                                color = Main.C4;
+                                break;
+                            case 5:
+                                color = Main.C5;
+                                break;
+                            case 6:
+                                color = Main.C6;
+                                break;
+                            case 7:
+                                color = Main.C7;
+                                break;
+                            default:
+                                color = Main.C8;
+                                break;
+                        }
                         Main.resultMap[y][x] = ' ' + color + around + Main.RESET + ' ';
                     }
 
@@ -137,7 +155,7 @@ class TouchingThread extends Thread{
         }
 
         if (Main.flag) {
-            out.println("Switched to Flag mode.\n");
+            FlagThread.flag.setText("\nSwitched to Flag mode.\n").printlnAndReset();
             new FlagThread().start();
         }
     }

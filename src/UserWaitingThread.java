@@ -16,10 +16,10 @@ class UserWaitingThread extends Thread{
             if (answer.equalsIgnoreCase(Messages.YES.toString())) {
                 new NewGameThread().start();
             } else {
-                System.out.println(Messages.THANKS);
+                new Termicol(Messages.THANKS).setFG(255, 200, 0).setEffect(Effect.BOLD).println();
             }
         } catch (IOException e) {
-            System.out.println(Messages.THANKS);
+            new Termicol(Messages.THANKS).setFG(255, 200, 0).setEffect(Effect.BOLD).println();
         }
     }
 }
