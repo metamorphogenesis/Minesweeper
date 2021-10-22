@@ -32,12 +32,12 @@ public class Main {
     static final String LAST = "\u001B[38;2;255;40;40m ֍ " + RESET;
     static final ArrayList<String> EXIT = new ArrayList<>(asList("exit", "quit", "end"));
 
-    static final int minWidth = 1;
+    static final int minWidth = 2;
     static final int maxWidth = 30;
-    static final int minHeight = 1;
+    static final int minHeight = 2;
     static final int maxHeight = 30;
     static final int minMineCoverage = 5;
-    static final int maxMineCoverage = 60;
+    static final int maxMineCoverage = 40;
 
     static volatile boolean flag;           // determines which of touch or flag threads are allowed
     static boolean[][] mines;               // mines array
@@ -145,7 +145,7 @@ public class Main {
                     try {
                         minesCount = Integer.parseInt(line);
 
-                        if (minesCount <= 0 || minesCount > width * height) {
+                        if (minesCount <= 0 || minesCount >= width * height) {
                             error.setText(Messages.MINES_OUT_OF_RANGE).printlnAndReset();
                         } else {
                             valueAccepted = true;
